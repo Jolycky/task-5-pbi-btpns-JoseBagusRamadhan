@@ -1,4 +1,4 @@
-module github.com/aryo24/task-5-pbi-btpns-aryowahyunugroho
+module github.com/jolycky/task-5-pbi-btpns-JoseBagusRamadhan
 
 go 1.17
 
