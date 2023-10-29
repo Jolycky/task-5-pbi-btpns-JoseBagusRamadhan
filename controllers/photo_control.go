@@ -6,12 +6,12 @@ import (
 	"net/http"
 	"strings"
 
-	"./app"
-	"./app/auth"
-	"./helpers/formaterror"
-	"./models"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"github.com/jolycky/task-5-pbi-btpns-JoseBagusRamadhan/app"
+	auth "github.com/jolycky/task-5-pbi-btpns-JoseBagusRamadhan/app/authentication"
+	formaterror "github.com/jolycky/task-5-pbi-btpns-JoseBagusRamadhan/helpers/errors"
+	"github.com/jolycky/task-5-pbi-btpns-JoseBagusRamadhan/models"
 )
 
 func GetPhoto(c *gin.Context) {

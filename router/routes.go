@@ -8,23 +8,19 @@ import (
 	"github.com/jolycky/task-5-pbi-btpns-JoseBagusRamadhan/middlewares"
 )
 
-// Melakukan set up routes end point
 func SetupRoutes(db *gorm.DB) *gin.Engine {
 	r := gin.Default()
 	r.Use(func(c *gin.Context) {
 		c.Set("db", db)
 	})
 
-	//User
 	r.POST("/users/login", controllers.Login)
 	r.POST("/users/register", controllers.CreateUser)
 	r.PUT("/users/:userId", controllers.UpdateUser)
 	r.DELETE("/users/:userId", controllers.DeleteUser)
 
-	//PhotoUrl
 	r.GET("/photos", controllers.GetPhoto)
 
-	//Photo Url yang membutuhkan token jwt
 	secured := r.Group("/").Use(middlewares.Auth())
 	{
 		secured.POST("/photos", controllers.CreatePhoto)

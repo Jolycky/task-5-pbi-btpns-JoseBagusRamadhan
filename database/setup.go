@@ -11,7 +11,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// Melakukan set up database berdasarkan env dan menyambungkan dengan db postgre sql
+
 func SetupDB() *gorm.DB {
 
 	godotenv.Load(".env")

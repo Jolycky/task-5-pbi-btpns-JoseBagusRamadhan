@@ -6,28 +6,25 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/jolycky/task-5-pbi-btpns-JoseBagusRamadhan/app"
-	"github.com/jolycky/task-5-pbi-btpns-JoseBagusRamadhan/app/auth"
-	"github.com/jolycky/task-5-pbi-btpns-JoseBagusRamadhan/helpers/errors"
-	"github.com/jolycky/task-5-pbi-btpns-JoseBagusRamadhan/helpers/encrypt"
-	"github.com/jolycky/task-5-pbi-btpns-JoseBagusRamadhan/models"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"github.com/jolycky/task-5-pbi-btpns-JoseBagusRamadhan/app"
+	auth "github.com/jolycky/task-5-pbi-btpns-JoseBagusRamadhan/app/authentication"
+	hash "github.com/jolycky/task-5-pbi-btpns-JoseBagusRamadhan/helpers/encrypt"
+	formaterror "github.com/jolycky/task-5-pbi-btpns-JoseBagusRamadhan/helpers/errors"
+	"github.com/jolycky/task-5-pbi-btpns-JoseBagusRamadhan/models"
 	"golang.org/x/crypto/bcrypt"
 )
 
-
 func CreateUser(c *gin.Context) {
-	
+
 	db := c.MustGet("db").(*gorm.DB)
 
-	
 	body, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"status": "F", "message": err.Error(), "data": nil})
 	}
 
-	
 	user_input := models.User{}
 	err = json.Unmarshal(body, &user_input)
 	if err != nil {
@@ -35,9 +32,7 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	
 	user_input.Initialize()
-
 
 	err = user_input.Validate("update")
 	if err != nil {
@@ -45,13 +40,11 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	
 	err = user_input.HashPassword()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	/
 	err = db.Debug().Create(&user_input).Error
 	if err != nil {
 		formattedError := formaterror.ErrorMessage(err.Error())
@@ -59,7 +52,6 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	
 	data := app.UserRegister{
 		ID:        user_input.ID,
 		Username:  user_input.Username,
@@ -68,17 +60,13 @@ func CreateUser(c *gin.Context) {
 		UpdatedAt: user_input.UpdatedAt,
 	}
 
-	
 	c.JSON(http.StatusOK, gin.H{"status": "T", "message": "register user success", "data": data})
 }
 
-
 func UpdateUser(c *gin.Context) {
 
-	
 	db := c.MustGet("db").(*gorm.DB)
 
-	
 	var user models.User
 	err := db.Debug().Where("id = ?", c.Param("userId")).First(&user).Error
 	if err != nil {
@@ -86,13 +74,11 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 
-	
 	body, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"status": "F", "message": err.Error(), "data": nil})
 	}
 
-	
 	user_input := models.User{}
 	user_input.ID = user.ID
 	err = json.Unmarshal(body, &user_input)
@@ -101,20 +87,17 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 
-	
 	err = user_input.Validate("update")
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"status": "F", "message": err.Error(), "data": nil})
 		return
 	}
 
-	
 	err = user_input.HashPassword()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	
 	err = db.Debug().Model(&user).Updates(&user_input).Error
 	if err != nil {
 		formattedError := formaterror.ErrorMessage(err.Error())
@@ -122,7 +105,6 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 
-	
 	data := app.UserRegister{
 		ID:        user_input.ID,
 		Username:  user_input.Username,
@@ -131,16 +113,12 @@ func UpdateUser(c *gin.Context) {
 		UpdatedAt: user_input.UpdatedAt,
 	}
 
-
 	c.JSON(http.StatusOK, gin.H{"status": "T", "message": "update user success", "data": data})
 }
 
-
 func DeleteUser(c *gin.Context) {
 
-	
 	db := c.MustGet("db").(*gorm.DB)
-
 
 	var user models.User
 
@@ -150,29 +128,24 @@ func DeleteUser(c *gin.Context) {
 		return
 	}
 
-	
 	err = db.Debug().Delete(&user).Error
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "F", "message": err.Error(), "data": nil})
 		return
 	}
 
-
 	c.JSON(http.StatusOK, gin.H{"status": "T", "message": "delete user success", "data": nil})
 }
-
 
 func Login(c *gin.Context) {
 
 	db := c.MustGet("db").(*gorm.DB)
-
 
 	body, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"status": "F", "message": err.Error(), "data": nil})
 		return
 	}
-
 
 	user_input := models.User{}
 	err = json.Unmarshal(body, &user_input)
@@ -188,7 +161,6 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	
 	var user_login app.UserLogin
 
 	err = db.Debug().Table("users").Select("*").Joins("left join photos on photos.user_id = users.id").
@@ -197,7 +169,6 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "F", "message": "user not found", "data": nil})
 		return
 	}
-
 
 	err = hash.VerifyPassword(user_login.Password, user_input.Password)
 	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
@@ -211,7 +182,6 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "F", "message": err.Error(), "data": nil})
 		return
 	}
-
 
 	data := app.DataUser{
 		ID: user_login.ID, Username: user_login.Username, Email: user_login.Email, Token: token,
